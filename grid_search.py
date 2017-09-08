@@ -50,17 +50,18 @@ geom_coeff = {1: [1,],
     5: [0.2, 0.5, 1, 2, 5]
 }
 
-#cv_result = xgb.cv()
+nFolds = 4
+cv_generator = sklearn.model_selection.StratifiedKFold(m_splits=nFolds, shuffle=True)
 
 print "start GridSearchCV"
 start = time.time()
 
 for x in grid:
     params_grid = x
-    cv_result = xgb.cv(params, xgb.DMatrix(trainSample[features], trainSample["signal"]), num_boost_round=100, nfold=3, metrics="logloss", early_stopping_rounds=10)
+    cv_result = xgb.cv(params, xgb.DMatrix(trainSample[features], trainSample["signal"]), num_boost_round=100, nfold=nFolds, metrics="logloss", early_stopping_rounds=10)
     params["n_estimators"] = cv_result.shape[0]
     print cv_result.shape[0]
-    grid = GridSearchCV(estimator=XGBClassifier(**params), param_grid = params_grid, cv = 3, scoring = "precision", verbose=2, n_jobs=4)
+    grid = GridSearchCV(estimator=XGBClassifier(**params), param_grid = params_grid, cv = cv_generator, iid = False, scoring = "precision", verbose=2, n_jobs=4)
     grid.fit(trainSample[features], trainSample["signal"])
     params.update(grid.best_params_)
     for key in params_grid.keys():
@@ -68,11 +69,11 @@ for x in grid:
         if tmp[1]-tmp[0] == tmp[len(tmp)-1] - tmp[len(tmp)-2]:
             mid = grid.best_params_[key]
             diff = float(tmp[1]-tmp[0])
-            params_grid[key] = getNewArytmList(mid, diff, shrinkage, key)
+            params_grid[key] = getNewArythmList(mid, diff, shrinkage, key)
         else:
             mid = grid.best_params_[key]
             params_grid[key] = [mid * scale for scale in geom_coeff[2*shrinkage-1]]
-    grid = GridSearchCV(estimator=XGBClassifier(**params), param_grid = params_grid, cv = 3, scoring = "precision", verbose=2, n_jobs=4)
+    grid = GridSearchCV(estimator=XGBClassifier(**params), param_grid = params_grid, cv = cv_generator, iid = False, scoring = "precision", verbose=2, n_jobs=4)
     grid.fit(trainSample[features], trainSample["signal"])
     params.update(grid.best_params_)
 

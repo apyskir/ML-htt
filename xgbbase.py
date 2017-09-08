@@ -6,6 +6,18 @@ import pandas as pd
 from sklearn import *
 import numpy as np
 
+samples = {
+    "ZTT":1,
+    "ZJ":2,
+    "ZL":3,
+    "W":4,
+    "ggH":5,
+    "qqH":6,
+    "WplusH":7,
+    "WminusH":8,
+    "ZH":9
+    }
+
 fileName = "RootAnalysis_AnalysisMuTau_pandas_big"
 print "start read"
 start = time.time()
@@ -14,7 +26,7 @@ end = time.time()
 print "end read: ", end - start, " s"
 #print(data.head())
 signalNumbers = [5,6,7,8,9]
-bkgNumbers=[1,2,3,4]
+bkgNumbers=[1,]#2,3,4]
 print "start convert"
 data.loc[data["sampleNumber"].isin(bkgNumbers), "signal"] = 0
 data.loc[data["sampleNumber"].isin(signalNumbers), "signal"] = 1
@@ -93,17 +105,17 @@ def splitTrainIntoTT(df, trainingFraction):
 #print trainSample.shape[0], testSample.shape[0]
 #print a[0].shape[0], a[1].shape[0]
 
-def getNewArytmList(mid, diff, shrinkage, name):
+def getNewArythmList(mid, diff, shrinkage, name):
     newList = [value for value in list(np.arange(mid - (shrinkage-1)*diff/shrinkage, mid+(shrinkage-1+0.1)*diff/shrinkage, diff/shrinkage)) if value >= 0]
-    print "diff:", diff, "diff/shrinkage:", diff/shrinkage
-    print "Nowa lista dla", name, newList
+    #print "diff:", diff, "diff/shrinkage:", diff/shrinkage
+    #print "Nowa lista dla", name, newList
     if name in ["subsample", "colsample_bytree"]:
         newList = [x for x in newList if x<=1]
-        print "Nowa lista po poprawkach dla", name, newList
+        #print "Nowa lista po poprawkach dla", name, newList
     if name in ["max_depth",]:
         for x in newList:
-            print abs(x-round(x))
-            print abs(x-round(x))<0.0000001
+            #print abs(x-round(x))
+            #print abs(x-round(x))<0.0000001
         newList = [int(round(x)) for x in newList if abs(x-round(x))<0.0000001]
-        print "Nowa lista po poprawkach dla", name, newList
+        #print "Nowa lista po poprawkach dla", name, newList
     return newList
