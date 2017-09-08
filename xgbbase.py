@@ -92,3 +92,18 @@ def splitTrainIntoTT(df, trainingFraction):
 #trainSample, testSample = splitTrainIntoTT(train[train["sampleNumber"].isin([8,9])], 0.6)
 #print trainSample.shape[0], testSample.shape[0]
 #print a[0].shape[0], a[1].shape[0]
+
+def getNewArytmList(mid, diff, shrinkage, name):
+    newList = [value for value in list(np.arange(mid - (shrinkage-1)*diff/shrinkage, mid+(shrinkage-1+0.1)*diff/shrinkage, diff/shrinkage)) if value >= 0]
+    print "diff:", diff, "diff/shrinkage:", diff/shrinkage
+    print "Nowa lista dla", name, newList
+    if name in ["subsample", "colsample_bytree"]:
+        newList = [x for x in newList if x<=1]
+        print "Nowa lista po poprawkach dla", name, newList
+    if name in ["max_depth",]:
+        for x in newList:
+            print abs(x-round(x))
+            print abs(x-round(x))<0.0000001
+        newList = [int(round(x)) for x in newList if abs(x-round(x))<0.0000001]
+        print "Nowa lista po poprawkach dla", name, newList
+    return newList
